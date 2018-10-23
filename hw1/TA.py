@@ -34,4 +34,7 @@ def test_constellation():
 while True:
     # IRCMsg = IRCSocket.recv(4096).decode()
     # print(IRCMsg)
-    send_privatemsg(input())
+    send_privatemsg(botID, input())
+    IRCMsg = IRCSocket.recv(4096).decode()
+    print(IRCMsg)
+
