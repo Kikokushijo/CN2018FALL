@@ -49,12 +49,19 @@ def process(result):
         elif command == '!guess':
             bot_status[sender] = 'guess'
             pass
+        elif command == '!chat':
+            bot_status[sender] = 'chat'
+        elif command == '!song':
+            pass
     # guessing mode
     elif bot_status[sender] == 'guess':
         pass
     # chatting mode
     elif bot_status[sender] == 'chat':
-        pass
+        if command == '!bye':
+            bot_status[sender] = ''
+        else:
+            pass
 
 
 
