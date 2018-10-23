@@ -15,7 +15,11 @@ constellation_set = set([
     'Scorpio', 'Sagittarius'
 ])
 
-bot_status = defaultdict(str)
+class BotStatus(object):
+    def __init__(self):
+        self.mode = ''
+
+bot_statuses = defaultdict(BotStatus)
 
 def send_msg(msg):
     IRCSocket.send(bytes(msg + '\r\n', encoding='utf-8'))
@@ -42,24 +46,44 @@ def process(result):
 
     sender, command = result
 
+    bot_status = bot_statuses[sender]
+
     # general mode
-    if not bot_status[sender]:
+    if not bot_status.mode:
         if command in constellation_set:
-            send_privatemsg(sender, 'Today is a lucky day.')
+            send_privatemsg(sender, '今日運勢 水星逆行')
         elif command == '!guess':
-            bot_status[sender] = 'guess'
-            pass
+            bot_status.mode = 'guess'
+            send_privatemsg(sender, '猜一個1~10之間的數字！')
+            bot_status.guess_ans = random.randint(1, 10)
         elif command == '!chat':
-            bot_status[sender] = 'chat'
+            bot_status.mode = 'chat'
         elif command == '!song':
             pass
     # guessing mode
-    elif bot_status[sender] == 'guess':
-        pass
+    elif bot_status.mode == 'guess':
+        try:
+            command = int(command)
+        except ValueError:
+            pass
+        else:
+            if bot_status.ans == command:
+                send_privatemsg(sender, '正確答案為%d! 恭喜猜中' % command)
+                bot_statuses[sender] = BotStatus()
+            elif bot_status.ans < command:
+                hint = '小於%d!' % command
+            else:
+                hint = '大於%d!' % command
+
+            if command in bot_status.has_guessed:
+                hint = '你猜過%d了=_= %s' % (command, hint)
+            else:
+                bot_status.has_guessed.update(command)
+            send_privatemsg(sender, hint)
     # chatting mode
-    elif bot_status[sender] == 'chat':
+    elif bot_status.mode == 'chat':
         if command == '!bye':
-            bot_status[sender] = ''
+            bot_status.mode = ''
         else:
             pass
 

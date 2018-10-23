@@ -20,7 +20,7 @@ constellation_set = set([
 def send_msg(msg):
     IRCSocket.send(bytes(msg + '\r\n', encoding='utf-8'))
 
-def send_privatemsg(msg, receiver):
+def send_privatemsg(receiver, msg):
     IRCSocket.send(bytes("PRIVMSG %s :%s \r\n" % (receiver, msg), encoding='utf-8'))
 
 send_msg('NICK %s' % (TAID))
@@ -28,8 +28,10 @@ send_msg('USER %s' % (TAID))
 send_msg('JOIN %s' % (roomName))
 send_msg("PRIVMSG %s :I'm %s " % (roomName, TAID))
 
+def test_constellation():
+    send_privatemsg(botID, random.sample(constellation_set, k=1)[0])
+
 while True:
     # IRCMsg = IRCSocket.recv(4096).decode()
     # print(IRCMsg)
-    send_privatemsg(random.sample(constellation_set, k=1)[0], botID)
-    time.sleep(3)
+    send_privatemsg(input())
