@@ -1,5 +1,5 @@
-import socket, select, sys, termios, tty
-import termios, requests, fcntl, os, locale
+import socket, sys
+import requests, fcntl, os, locale
 import re, random
 from bs4 import BeautifulSoup as BS
 from collections import defaultdict
@@ -43,9 +43,6 @@ def parse(msg):
 
     return None
 
-def is_typing():
-    return select.select([sys.stdin], [], [], 0) == ([sys.stdin], [], [])
-
 def nonblocking_readlines(f):
     """Generator which yields lines from F (a file object, used only for
        its fileno()) without blocking.  If there is no data, you get an
@@ -78,8 +75,8 @@ def nonblocking_readlines(f):
         while True:
             r = buf.find(b'\r')
             n = buf.find(b'\n')
-            if r == -1 and n == -1: break
-
+            if r == -1 and n == -1:
+                break
             if r == -1 or r > n:
                 yield buf[:(n+1)].decode(enc)
                 buf = buf[(n+1):]
