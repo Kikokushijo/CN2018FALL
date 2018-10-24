@@ -102,12 +102,12 @@ def chatting(chatter):
             result = parse(received_msg)
             if result is not None:
                 sender, msg = result
-            if sender == chatter:
-                print('\r%s : %s' % (chatter, msg))
-                print('>', end=' ', flush=True)
-                if msg.strip() == '!bye':
-                    print('\r=========%s已離開聊天室=========' % chatter)
-                    return
+                if sender == chatter:
+                    print('\r%s : %s' % (chatter, msg))
+                    print('>', end=' ', flush=True)
+                    if msg.strip() == '!bye':
+                        print('\r=========%s已離開聊天室=========' % chatter)
+                        return
 
         input_msg = next(input_stream)
         if input_msg:
