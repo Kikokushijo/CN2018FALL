@@ -64,7 +64,7 @@ if __name__ == '__main__':
     fetched_seq_num = 0
     prev_fetched_seq_num = 0
     acked_seq_num = 0
-    resend_timeout = 0.25
+    resend_timeout = 1.0
 
     while not is_EOF or not buffer.empty():
 
