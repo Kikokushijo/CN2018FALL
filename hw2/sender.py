@@ -64,7 +64,7 @@ if __name__ == '__main__':
     fetched_seq_num = 0
     prev_fetched_seq_num = 0
     acked_seq_num = 0
-    resend_timeout = 1.0
+    resend_timeout = 0.90
 
     while not is_EOF or not buffer.empty():
 
@@ -79,16 +79,19 @@ if __name__ == '__main__':
                 # segment = generate_segment(len(msg), 0, 0, 1, 0, 0, msg)
             # buffer.put(segment)
         
+        max_has_sent_seq = -1        
         for i in range(min(window_size, buffer.qsize())):
             seg = buffer.queue[i]
             reconstruct_seg = unpack_segment(seg)
             prefix = 'send' if reconstruct_seg.head.seqNumber > prev_fetched_seq_num else 'resnd'
             assert not reconstruct_seg.head.fin
+            max_has_sent_seq = max(max_has_sent_seq, reconstruct_seg.head.seqNumber)
             print('%s\tdata\t#%d,\twinSize = %d' % (prefix, reconstruct_seg.head.seqNumber, window_size))
             s.sendto(seg, agent_address)
         prev_fetched_seq_num = fetched_seq_num
-        time.sleep(resend_timeout)
+        # time.sleep(resend_timeout)
 
+        start_sleep_time = time.time()
         while True:
             try:
                 segment = s.recv(segment_size)
@@ -96,14 +99,18 @@ if __name__ == '__main__':
                 assert segment.head.ack and not segment.head.fin
                 print('recv\tack\t#%d' % segment.head.ackNumber)
                 acked_seq_num = max(acked_seq_num, segment.head.ackNumber)
-            except socket.error as error:
-                if error.errno == errno.EAGAIN or error.errno == errno.EWOULDBLOCK:
+                if acked_seq_num == max_has_sent_seq:
                     break
-                else:
-                    print('Another error occurs.')
-                    quit()
+            except socket.error as error:
+                # if error.errno == errno.EAGAIN or error.errno == errno.EWOULDBLOCK:
+                time.sleep(0.1)
+                if time.time() - start_sleep_time >= resend_timeout:
+                    break
+                # else:
+                #     print('Another error occurs.')
+                #     quit()
         
-        if acked_seq_num == fetched_seq_num:
+        if acked_seq_num == max_has_sent_seq:
             if window_size < threshold:
                 window_size *= 2
             else:
@@ -125,7 +132,7 @@ if __name__ == '__main__':
         try:
             segment = s.recv(segment_size)
             segment = unpack_segment(segment)
-            assert segment.head.ack and segment.head.fin
+            # assert segment.head.ack and segment.head.fin
             if segment.head.fin:
                 print('recv\tfinack')
                 quit()
