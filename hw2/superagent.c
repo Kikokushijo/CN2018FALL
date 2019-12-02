@@ -269,17 +269,7 @@ int main(int argc, char* argv[]){
                         fprintf(stderr, "ERROR: 順序有誤！預計收到#%d，卻收到#%d\n", win_start_idx+win_offset-1, index);
                         exit(1);
                     }
-                    if (rand() % 100 < 100 * loss_rate)
-                    {
-                        drop_data++;
-                        // TODO: 真的把資料丟掉
-                        printf("drop	data	#%d,	loss rate = %.4f\n", index, (float)drop_data / total_data);
-                    }
-                    else
-                    {
-                        printf("get	data	#%d\n", index);
-                    }
-
+		    printf("get	data	#%d\n", index);
                     printf("win_offset = %d, win_size = %d, threshold = %d\n", win_offset, win_size, threshold);
                     if (win_offset == win_size) {
                         // NOTE: 試著再收個封包看看
